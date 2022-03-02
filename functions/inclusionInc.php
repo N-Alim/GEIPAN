@@ -3,14 +3,16 @@
 function inclusionInc(string $value) : void
 {
     $files = glob('./includes/*.inc.php');
-    $page = $_GET['page'] ?? $value;
+    
+    $page = $_GET['page'] ?? 'home';
 
     $pageTest = './includes/' . $page . '.inc.php';
-    if (!in_array($pageTest, $files)) {
-        require './includes/'. $value .'.inc.php';
+
+    if (in_array($pageTest, $files)) {
+        require $pageTest;
     }
     
     else {
-        require $pageTest;
+        require './includes/' . $value . '.inc.php';
     }
 }
