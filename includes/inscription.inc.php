@@ -10,7 +10,7 @@ if (isset($_SESSION['login']))
 
 else
 {
-    $formCreator = new Form("post", "index.php?page=inscription");
+    $formCreator = new Form("post", "index.php?page=inscription", "multipart/form-data");
     $formCreator->getFormValues();
     $form = $formCreator->createFormFromCSV("./assets/frmFiles/inscription.csv");
 
@@ -34,7 +34,7 @@ else
             $user->setNom($formCreator->getValue("nom"));
             $user->setPrenom($formCreator->getValue("prenom"));
             $user->setMail($formCreator->getValue("mail"));
-            $user->setAvatar("dummy" /* $formCreator->getValue("Avatar") */);
+            $user->setAvatar($formCreator->getValue("avatar"));
             $user->setConnexion($connHand);
 
             $user->inscription($formCreator->getValue("mdp"));
