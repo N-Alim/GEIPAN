@@ -12,6 +12,8 @@
                     echo "<li><a href=\"index.php?page=inscription\">Inscription</a></li>";
                 }
             ?>
+            <li><a href="index.php?page=404">UFO Findings</a></li>
+
         </ul>
     </nav>
 </header>
