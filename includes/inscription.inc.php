@@ -19,7 +19,7 @@ if (isset($_POST['envoi']))
     {
         $connHand = new Query;
 
-        $resultat = $connHand->select("SELECT * FROM t_users WHERE usermail='". $formCreator->getValue("mail") . "'");
+        $resultat = $connHand->select("SELECT * FROM users WHERE usermail='". $formCreator->getValue("mail") . "'");
         
         if (count($resultat) !== 0) 
         {
@@ -30,21 +30,21 @@ if (isset($_POST['envoi']))
         {
             $token = sha1(getRandomString(128));
 
-            $connHand->insert("
-            INSERT INTO t_users(usename, usefirstname, usermail, usepassword, id_role, usetoken)
+            $connHand->insertion("
+            INSERT INTO users(userName, userFirstname, userMail, userPassword, id_role, usertoken)
             VALUES ('". $formCreator->getValue("nom") 
             . "', '". $formCreator->getValue("prenom") 
             . "', '". $formCreator->getValue("mail") 
-            . "', '". password_hash($formCreator->getValue("mdp"), PASSWORD_DEFAULT) . "', 3, '$token')
+            . "', '". password_hash($formCreator->getValue("mdp"), PASSWORD_DEFAULT) . "', 2, '$token')
             ");
             
             $from = "contact.news@gmail.com";
             $to = $formCreator->getValue("mail");
             $subject = "Vérification de votre compte";
             $header = "Content-type: text/html; charset=iso-8859-1\nFrom:" . $from;
-            $message = "<a href='http://localhost/ExercicePHP/index.php?page=mailValidation&token=" 
+            $message = "<a href='http://localhost/GEIBAN/index.php?page=mailValidation&token=" 
             . urlencode($token) . "&mail=" 
-                . urlencode(password_hash($formCreator->getValue("mail"), PASSWORD_DEFAULT)) . "' target='_blank'>Cliquez sur ce lien pour valider votre compte</a>";
+                . $formCreator->getValue("mail") . "' target='_blank'>Cliquez sur ce lien pour valider votre compte</a>";
             mail($to, $subject, $message, $header);
         }
     } 
