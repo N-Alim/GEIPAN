@@ -1,0 +1,7 @@
+Nom de l'input;Type de l'input;Persistence de la valeur;Valeur du label;Valeur par défaut de l'input
+obsDate;DateTime;true;Observation Date;
+obsDur;Time;true;Observation Duration;
+obsLoc;Select;true;Observation Location;
+obsCardinalPoint;Select;true;CardinalPoint;
+obsWeather;Select;false;Weather;
+obsDescription;LongText;false;Observation Description;
