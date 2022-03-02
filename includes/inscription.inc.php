@@ -44,7 +44,7 @@ if (isset($_POST['envoi']))
             $header = "Content-type: text/html; charset=iso-8859-1\nFrom:" . $from;
             $message = "<a href='http://localhost/GEIBAN/index.php?page=mailValidation&token=" 
             . urlencode($token) . "&mail=" 
-                . $formCreator->getValue("mail") . "' target='_blank'>Cliquez sur ce lien pour valider votre compte</a>";
+                . urlencode($formCreator->getValue("mail")) . "' target='_blank'>Cliquez sur ce lien pour valider votre compte</a>";
             mail($to, $subject, $message, $header);
         }
     } 
