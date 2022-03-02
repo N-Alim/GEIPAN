@@ -18,6 +18,13 @@ class Form
         {
             $this->formValues[$key][1] = htmlentities(trim($value));
         }
+
+        dump($_FILES);
+
+        foreach ($_FILES as $key => $value) 
+        {
+            $this->formValues[$key][1] = $value;
+        }
     }
 
     public function createFormFromCSV($csvPath, $linesOffset = 1)
@@ -31,10 +38,11 @@ class Form
             $formInputs[$csvInputs[$cnt][0]] = 
             [ $this->createInputTypeFromString($csvInputs[$cnt][1]),
             ($csvInputs[$cnt][2] === "true") ? true : false, 
-            $csvInputs[$cnt][3]];
+            $csvInputs[$cnt][3], 
+            $csvInputs[$cnt][4]];
         }
 
-        var_dump($formInputs);
+        dump($formInputs);
 
         return $this->createForm($formInputs);
 }   
@@ -48,6 +56,9 @@ class Form
 
             case "File":
                 return InputType::File;
+
+            case "FileMultiple":
+                return InputType::FileMultiple;
 
             case "LongText":
                 return InputType::LongText;
@@ -99,10 +110,14 @@ class Form
             case InputType::Text:
             case InputType::Mail:
                 $this->form .= "<input type='texte' id='$name' name='$name' value=" 
-                . (($inputDetails[1]) ? ($this->formValues[$name][1] ?? "") : "") . "></li>"; 
+                . (($inputDetails[1]) ? ($this->formValues[$name][1] ?? $inputDetails[3]) : $inputDetails[3]) . "></li>"; 
                 break;
 
             case InputType::File:
+                $this->form .= "<input type='file' id='$name' name='$name' accept='image/jpeg, image/jpg, image/png, image/gif'></li>"; 
+                break;
+
+            case InputType::FileMultiple:
                 $this->form .= "<input type='file' id='$name' name='$name" . "[]' accept='image/jpeg, image/jpg, image/png, image/gif' multiple></li>"; 
                 break;
                 
@@ -121,18 +136,19 @@ class Form
 
             case InputType::LongText:
                 $this->form .= "<textarea id='$name' name='$name' value='" 
-                . (($inputDetails[1]) ? "<?php echo \$$name;?>" : "") . "'></textarea></li>";          
+                . (($inputDetails[1]) ? "<?php echo \$$name;?>" : $inputDetails[3]) . "'></textarea></li>";          
                 break;
 
             case InputType::Date:
                 $this->form .= "<input type='date' id='$name' name='$name' value=" 
-                . (($inputDetails[1]) ? ($this->formValues[$name][1] ?? "") : "") . "></li>"; 
+                . (($inputDetails[1]) ? ($this->formValues[$name][1] ?? $inputDetails[3]) : $inputDetails[3]) . "></li>"; 
                 break;
 
             default:
         }
 
         $this->formValues[$name][0] = $inputDetails[0];
+        $this->formValues[$name][2] = $inputDetails[3];
     }
 
     public function setValuesChecker(ErrorHandler $errorHand)
@@ -149,6 +165,8 @@ class Form
                 $this->checkValue($key, $value);
             }
         }
+
+        dump($this->formValues);
     }
 
     private function checkValue($inputName, $inputDetails)
@@ -171,12 +189,9 @@ class Form
                     $this->errorHand->addError("Veuillez saisir un e-mail valide");
                 break;
 
-            /*
             case InputType::File:
-                $this->form .= "<input type='file' id='$name' name='$name' value='" 
-                . (($inputDetails[1]) ? "<?php echo \$$name;?>" : "") . "' /></li>"; 
+                $this->checkFile($inputName); 
                 break;
-            */
 
             case InputType::Password:
             case InputType::Date:
@@ -199,6 +214,82 @@ class Form
 
             default:
         }
+    }
+
+
+    private function checkFile(string $name)
+    {
+        if ($this->formValues[$name][1]['error'] == 4) 
+        {
+            $this->formValues[$name][1] = $this->formValues[$name][2];
+        }
+    
+        else if ($this->formValues[$name][1]['error'] == 0) 
+        {
+            $fileName = $this->formValues[$name][1]['name'];
+            $fileType = $this->formValues[$name][1]['type'];
+            $fileTmpName = $this->formValues[$name][1]['tmp_name'];
+            
+            $tableauTypes = array("image/jpeg", "image/jpg", "image/png", "image/gif");
+    
+            if (in_array($fileType, $tableauTypes))
+            {
+                $path = getcwd() . "/assets/avatar/";
+                $date = date('Ymdhis');
+                $fileName = $date . $fileName;
+                $fileFullName = $path . $fileName;
+                $fileFullName = str_replace("\\", "/", $fileFullName);
+    
+                move_uploaded_file($fileTmpName, $fileFullName);
+
+                $this->formValues[$name][1] = $fileFullName;
+            }
+            else 
+            {
+                $this->errorHand->addError("Erreur type MIME");
+            }
+        }
+    
+        else 
+        {
+            $this->getFileError($this->formValues[$name][1]['error']);
+        }
+    }
+
+
+    private function getFileError(int $errorValue)
+    {
+        switch($errorValue) {
+            case 1 :
+                $fileUploadErrorMessage = "La taille du fichier téléchargé excède la valeur de upload_max_filesize.";
+            break;
+
+            case 2 :
+                $fileUploadErrorMessage = "La taille du fichier téléchargé excède la valeur de MAX_FILE_SIZE, qui a été spécifiée dans le formulaire HTML.";
+            break;
+
+            case 3 :
+                $fileUploadErrorMessage = "Le fichier n'a été que partiellement téléchargé.";
+            break;
+
+            case 4 :
+                $fileUploadErrorMessage = "Aucun fichier n'a été téléchargé.";
+            break;
+
+            case 6 :
+                $fileUploadErrorMessage = "Un dossier temporaire est manquant.";
+            break;
+
+            case 7 :
+                $fileUploadErrorMessage = "Échec de l'écriture du fichier sur le disque.";
+            break;
+
+            case 8 :
+                $fileUploadErrorMessage = "Une extension PHP a arrêté l'envoi de fichier.";
+            break;
+        }
+
+        $this->errorHand->addError("Erreur upload : " . $fileUploadErrorMessage);
     }
 
     public function getValue($key)
