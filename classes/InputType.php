@@ -10,9 +10,7 @@ enum InputType
     case Password;
     case PasswordInit;
     case PasswordVerif;
-    case Date;
+    case Time;
     case DateTime;
     case Select;
-    case SelectMultiple;
 }
-
