@@ -19,8 +19,6 @@ class Form
             $this->formValues[$key][1] = htmlentities(trim($value));
         }
 
-        dump($_FILES);
-
         foreach ($_FILES as $key => $value) 
         {
             $this->formValues[$key][1] = $value;
@@ -41,8 +39,6 @@ class Form
             $csvInputs[$cnt][3], 
             $csvInputs[$cnt][4]];
         }
-
-        dump($formInputs);
 
         return $this->createForm($formInputs);
 }   
@@ -75,8 +71,11 @@ class Form
             case "PasswordVerif":
                 return InputType::PasswordVerif;
 
-            case "Date":
-                return InputType::Date;
+            case "Time":
+                return InputType::Time;
+            
+            case "DateTime":
+                return InputType::DateTime;
 
             case "Select";
                 return InputType::Select;
@@ -139,9 +138,19 @@ class Form
                 . (($inputDetails[1]) ? "<?php echo \$$name;?>" : $inputDetails[3]) . "'></textarea></li>";          
                 break;
 
-            case InputType::Date:
-                $this->form .= "<input type='date' id='$name' name='$name' value=" 
+            case InputType::Time:
+                $this->form .= "<input type='time' id='$name' name='$name' step='1' value=" 
                 . (($inputDetails[1]) ? ($this->formValues[$name][1] ?? $inputDetails[3]) : $inputDetails[3]) . "></li>"; 
+                break;
+
+            case InputType::DateTime:
+                $this->form .= "<input type='datetime-local' id='$name' name='$name' value=" 
+                . (($inputDetails[1]) ? ($this->formValues[$name][1] ?? $inputDetails[3]) : $inputDetails[3]) . "></li>"; 
+                break;
+
+            case InputType::Select:
+                $this->form .= "<select range='$name' id='$name' name='$name'>
+                </select>"; 
                 break;
 
             default:
@@ -165,8 +174,6 @@ class Form
                 $this->checkValue($key, $value);
             }
         }
-
-        dump($this->formValues);
     }
 
     private function checkValue($inputName, $inputDetails)
@@ -194,7 +201,8 @@ class Form
                 break;
 
             case InputType::Password:
-            case InputType::Date:
+            case InputType::Time:
+            case InputType::DateTime:
                 if (strlen($this->formValues[$inputName][1]) === 0)
                     $this->errorHand->addError("Champ \"$inputName\" manquant");
                 break;
