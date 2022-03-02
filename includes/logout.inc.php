@@ -2,4 +2,4 @@
 $_SESSION['login'] = false;
 session_unset();
 session_destroy();
-echo "<script>document.location.replace('http://localhost/ExercicePHP/');</script>";   
+echo "<script>document.location.replace('http://localhost/GEIPAN/');</script>";   
