@@ -20,7 +20,7 @@ if (isset($_POST['envoi']))
     {
         $connHand = new Query;
 
-        $resultat = $connHand->select("SELECT * FROM t_users WHERE usermail='" . $formCreator->getValue("mail") . "'");
+        $resultat = $connHand->select("SELECT * FROM users WHERE usermail='" . $formCreator->getValue("mail") . "'");
 
         if (count($resultat) === 0)
         {
@@ -29,17 +29,17 @@ if (isset($_POST['envoi']))
 
         else
         {
-            $mdpRequete = $resultat[0]->USEPASSWORD;
+            $mdpRequete = $resultat[0]->userPassword;
             if (password_verify($formCreator->getValue("mdp"), $mdpRequete))
             {
                 if (!isset($_SESSION['login']))
                 {
                     $_SESSION['login'] = true;
-                    $_SESSION['nom'] = $resultat[0]->USENAME;
-                    $_SESSION['prenom'] = $resultat[0]->USEFIRSTNAME;
-                    $_SESSION['role'] = $resultat[0]->ID_ROLE;
+                    $_SESSION['nom'] = $resultat[0]->userName;
+                    $_SESSION['prenom'] = $resultat[0]->userFirstNAme;
+                    $_SESSION['role'] = $resultat[0]->id_role;
                     echo "<script>
-                    document.location.replace('http://localhost/ExercicePHP/');
+                    document.location.replace('http://localhost/GEIPAN/');
                     </script>";
                 }
 
