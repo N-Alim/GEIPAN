@@ -5,8 +5,10 @@ abstract class User
     protected string $nom;
     protected string $prenom = "";
     protected string $mail = "";
-    protected string $dateNaissance = "";
+    protected string $avatar = "";
     protected int $role = 2;
+    protected Query $connexion;
+    use TokenHandler;
 
     public function setNom(string $nom) : void
     {
@@ -45,14 +47,14 @@ abstract class User
         return isset($this->mail) ? $this->mail : false;
     }
 
-    public function setDateNaissance(string $dateNaissance) : void
+    public function setAvatar(string $avatar) : void
     {
-        $this->dateNaissance = $dateNaissance;
+        $this->avatar = $avatar;
     }
 
-    public function getDateNaissance() : string|bool
+    public function getAvatar() : string|bool
     {
-        return isset($this->dateNaissance) ? $this->dateNaissance : false;
+        return isset($this->avatar) ? $this->avatar : false;
     }
 
     public function setRole(string $role) : void
@@ -60,17 +62,68 @@ abstract class User
         $this->role = $role;
     }
 
+    public function getConnexion() : string|bool
+    {
+        return isset($this->connexion) ? $this->connexion : false;
+    }
+
+    public function setConnexion(Query $connexion) : void
+    {
+        $this->connexion = $connexion;
+    }
+
     public function getRole() : string|bool
     {
         return isset($this->role) ? $this->role : false;
     }
 
-    public function inscription(Sql $connexion)
+    public function inscription(string $mdp)
     {
-        $requete = "INSERT INTO users
-        (nom, prenom, mail, datenaissance, id_role) 
-        VALUES ('$this->nom', '$this->prenom', '$this->mail', '$this->dateNaissance', $this->role)";
+        $resultat = $this->connexion->select("SELECT * FROM users WHERE usermail='". $this->mail . "'");
 
-        $connexion->insertion($requete);
+        if (count($resultat) !== 0) 
+        {
+            if ($resultat[0]->userName === null)
+            {
+                $this->createToken();
+
+                $this->connexion->insertion("UPDATE users SET userName='$this->nom'
+                , userFirstname='$this->prenom'
+                , userPassword='" . password_hash($mdp, PASSWORD_DEFAULT) .
+                "', userAvatar='$this->avatar'
+                , id_role=2
+                , userToken='$this->token' WHERE usermail='$this->mail'");
+
+                echo "<p>Votre compte a été mis à jour</p>";
+
+                $this->sendMail();
+
+                echo "<p>Veuillez valider votre compte pour pouvoir vous connecter</p>";
+
+            }
+
+
+            else
+            {
+                echo "<p>Votre compte est déjà enregistrée dans la base de données</p>";
+            }
+        }
+
+        else 
+        {
+            $this->createToken();
+
+            $this->connexion->insertion("
+            INSERT INTO users(userName, userFirstname, userMail, userPassword, userAvatar, id_role, usertoken)
+            VALUES ('$this->nom', '$this->prenom', '$this->mail', '"
+            . password_hash($mdp, PASSWORD_DEFAULT) . "', '$this->avatar',  2, '$this->token')
+            ");
+
+            $this->sendMail();
+
+            echo "<p>Veuillez valider votre compte pour pouvoir vous connecter</p>";
+
+        }
     }
+
 }
