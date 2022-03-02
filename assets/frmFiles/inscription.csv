@@ -3,3 +3,4 @@ prenom;Text;true;Prénom
 nom;Text;true;Nom
 mail;Mail;true;Mail
 mdp;PasswordInit;false;Mot de passe
+avatar;File;false;Avatar
