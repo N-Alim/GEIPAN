@@ -5,10 +5,7 @@
 
 $formCreator = new Form("post", "index.php?page=login");
 $formCreator->getFormValues();
-$form = $formCreator->createForm([
-    "mail" => [InputType::Mail, false, "Mail"],
-    "mdp" => [InputType::Password, false, "Mot de passe"]
-]);
+$form = $formCreator->createFormFromCSV("./assets/frmFiles/login.csv");
 
 if (isset($_POST['envoi']))
 {
@@ -21,7 +18,7 @@ if (isset($_POST['envoi']))
 
     if ($formCreator->getErrorsCount() === 0)
     {
-        $connHand = new Sql;
+        $connHand = new Query;
 
         $resultat = $connHand->select("SELECT * FROM t_users WHERE usermail='" . $formCreator->getValue("mail") . "'");
 
