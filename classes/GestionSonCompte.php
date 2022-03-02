@@ -2,7 +2,7 @@
 
 trait GestionSonCompte
 {
-    public function connection(Sql $connexion)
+    public function connection(Query $connexion, string $password)
     {
         $requete = "SELECT * FROM users WHERE mail='$this->mail'";
         $resultats = $connexion->select($requete);
@@ -25,7 +25,7 @@ trait GestionSonCompte
         }
     }
 
-    public function update(Sql $connexion, array $newValues)
+    public function update(Query $connexion, array $newValues)
     {
         if (count($newValues) !== 0)
         {
