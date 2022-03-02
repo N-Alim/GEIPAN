@@ -19,7 +19,7 @@ trait TokenHandler
 
     public function createToken()
     {
-        $this->token = sha1(getRandomString(128));
+        $this->token = sha1($this->getRandomString(128));
     }
 
     public function sendMail()
