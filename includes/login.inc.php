@@ -2,37 +2,43 @@
 <?php
 
 
-
-$formCreator = new Form("post", "index.php?page=login");
-$formCreator->getFormValues();
-$form = $formCreator->createFormFromCSV("./assets/frmFiles/login.csv");
-
-if (isset($_POST['envoi']))
+if (isset($_SESSION['login']))
 {
+    echo "<script>
+    document.location.replace('http://localhost/GEIPAN/index.php?page=404');
+    </script>";
+}
 
-    $errorHand = new ErrorHandler;
+else
+{
+    $formCreator = new Form("post", "index.php?page=login");
+    $formCreator->getFormValues();
+    $form = $formCreator->createFormFromCSV("./assets/frmFiles/login.csv");
 
-    $formCreator->setValuesChecker($errorHand);
-
-    $formCreator->checkValues();
-
-    if ($formCreator->getErrorsCount() === 0)
+    if (isset($_POST['envoi']))
     {
-        $connHand = new Query;
 
-        $resultat = $connHand->select("SELECT * FROM users WHERE usermail='" . $formCreator->getValue("mail") . "'");
+        $errorHand = new ErrorHandler;
 
-        if (count($resultat) === 0)
+        $formCreator->setValuesChecker($errorHand);
+
+        $formCreator->checkValues();
+
+        if ($formCreator->getErrorsCount() === 0)
         {
-            echo "Pas de résultat avec votre login/mot de passe";
-        }
+            $connHand = new Query;
 
-        else
-        {
-            $mdpRequete = $resultat[0]->userPassword;
-            if (password_verify($formCreator->getValue("mdp"), $mdpRequete))
+            $resultat = $connHand->select("SELECT * FROM users WHERE usermail='" . $formCreator->getValue("mail") . "'");
+
+            if (count($resultat) === 0)
             {
-                if (!isset($_SESSION['login']))
+                echo "Pas de résultat avec votre login/mot de passe";
+            }
+
+            else
+            {
+                $mdpRequete = $resultat[0]->userPassword;
+                if (password_verify($formCreator->getValue("mdp"), $mdpRequete))
                 {
                     $_SESSION['login'] = true;
                     $_SESSION['nom'] = $resultat[0]->userName;
@@ -45,26 +51,21 @@ if (isset($_POST['envoi']))
 
                 else
                 {
-                    echo "Vous êtes déjà connecté, donc vous n'avez rien à faire ici";
+                    echo "Bien tenté, mais non";
                 }
             }
+        }
 
-            else
-            {
-                echo "Bien tenté, mais non";
-            }
+        else
+        {
+            echo $formCreator->checkErrors();
+            echo $form;
         }
     }
 
     else
     {
-        echo $formCreator->checkErrors();
+        echo "<h2>Merci de renseigner le formulaire&nbsp;:</h2>";
         echo $form;
     }
-}
-
-else
-{
-    echo "<h2>Merci de renseigner le formulaire&nbsp;:</h2>";
-    echo $form;
 }
