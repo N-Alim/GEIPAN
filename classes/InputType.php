@@ -13,6 +13,6 @@ enum InputType
     case Date;
     case DateTime;
     case Select;
-    case SelectMultiple
+    case SelectMultiple;
 }
 
