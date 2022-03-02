@@ -3,6 +3,6 @@
 ?>
 <main>
 <?php
-    inclusionInc('home');
+    inclusionInc('404');
 ?>
 </main>
